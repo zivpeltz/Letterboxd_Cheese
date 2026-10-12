@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  username     String         @unique
+  email        String         @unique
+  passwordHash String
+  displayName  String
+  bio          String?
+  avatarUrl    String?
+  location     String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  logs         CheeseLog[]
+  favorites    UserFavorite[]
+  wishlists    Wishlist[]
+  lists        CustomList[]
+  createdCheeses Cheese[]     @relation("CreatedCheeses")
+
+  @@map("users")
+}
+
+model CheeseType {
+  id           String    @id @default(uuid())
+  name         String    @unique // e.g. "Cheddar", "Cottage", "Brie", "Gouda"
+  slug         String    @unique
+  description  String?   // Extracted from Wikipedia
+  wikipediaUrl String?
+  thumbnailUrl String?
+  createdAt    DateTime  @default(now())
+
+  cheeses      Cheese[]
+
+  @@map("cheese_types")
+}
+
+model Cheese {
+  id              String        @id @default(uuid())
+  name            String        // e.g. "Extra Sharp White Cheddar", "Organic 4% Small Curd Cottage"
+  slug            String        @unique
+  maker           String        // Brand / Producer, e.g. "Cabot", "Good Culture", "Kerrygold", "Tnuva"
+  typeId          String?
+  type            CheeseType?   @relation(fields: [typeId], references: [id], onDelete: SetNull)
+  fatPercentage   Float?        // Optional: especially relevant for cottage / fresh cheese (e.g. 5.0, 9.0, 4.0)
+  description     String?       // Specific notes, or fallback to type description
+  imageUrl        String?
+  createdByUserId String?
+  createdByUser   User?         @relation("CreatedCheeses", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  logs            CheeseLog[]
+  favoritedBy     UserFavorite[]
+  wishlistedBy    Wishlist[]
+  listItems       ListItem[]
+
+  @@index([maker])
+  @@index([name])
+  @@map("cheeses")
+}
+
+model CheeseLog {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cheeseId     String
+  cheese       Cheese    @relation(fields: [cheeseId], references: [id], onDelete: Cascade)
+  consumedAt   DateTime  @default(now()) // Diary date
+  rating       Float     // 0.0 to 5.0 stars
+  isLiked      Boolean   @default(false)
+  isFirstTaste Boolean   @default(true)
+  reviewText   String?   // User review
+  photoUrl     String?   // Photo of cheese/plate/packaging
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId, consumedAt])
+  @@index([cheeseId])
+  @@map("cheese_logs")
+}
+
+model UserFavorite {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cheeseId  String
+  cheese    Cheese   @relation(fields: [cheeseId], references: [id], onDelete: Cascade)
+  position  Int      // 1, 2, 3, or 4 for Top 4
+
+  @@id([userId, position])
+  @@map("user_favorites")
+}
+
+model Wishlist {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cheeseId  String
+  cheese    Cheese   @relation(fields: [cheeseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, cheeseId])
+  @@map("wishlists")
+}
+
+model CustomList {
+  id          String     @id @default(uuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  isRanked    Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  items       ListItem[]
+
+  @@map("custom_lists")
+}
+
+model ListItem {
+  id        String     @id @default(uuid())
+  listId    String
+  list      CustomList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  cheeseId  String
+  cheese    Cheese     @relation(fields: [cheeseId], references: [id], onDelete: Cascade)
+  position  Int
+  notes     String?
+
+  @@unique([listId, cheeseId])
+  @@map("list_items")
+}
