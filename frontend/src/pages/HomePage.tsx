@@ -170,107 +170,139 @@ export const HomePage: React.FC = () => {
               gap: 16,
             }}
           >
-            {recentLogs
-              .filter((log) => log.reviewText && log.reviewText.trim().length > 0)
-              .map((log) => (
-                <div
-                  key={log.id}
-                  style={{
-                    backgroundColor: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: 16,
-                    display: 'flex',
-                    gap: 14,
-                    transition: 'border-color 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-focus)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}
+            {recentLogs.filter((log) => log.reviewText && log.reviewText.trim().length > 0).length === 0 ? (
+              <div
+                style={{
+                  gridColumn: '1 / -1',
+                  backgroundColor: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '36px 20px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 10,
+                }}
+              >
+                <div style={{ fontSize: 28 }}>🧀</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  No community reviews yet
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 360 }}>
+                  Taste a cheese recently? Be the first to share your rating and review notes!
+                </div>
+                <button
+                  className="btn btn-primary btn-sm"
+                  style={{ marginTop: 4 }}
+                  onClick={() => openLogModal()}
                 >
-                  {/* Reviewer Details */}
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Link to={`/users/${log.user.username}`}>
-                        {log.user.avatarUrl ? (
-                          <img
-                            src={log.user.avatarUrl}
-                            alt={log.user.displayName}
-                            style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <div
-                            style={{
-                              width: 26,
-                              height: 26,
-                              borderRadius: '50%',
-                              backgroundColor: 'var(--bg-elevated)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: 12,
-                            }}
-                          >
-                            🧀
-                          </div>
-                        )}
-                      </Link>
-                      <div>
-                        <Link
-                          to={`/users/${log.user.username}`}
-                          style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}
-                        >
-                          {log.user.displayName}
+                  + Log the First Cheese
+                </button>
+              </div>
+            ) : (
+              recentLogs
+                .filter((log) => log.reviewText && log.reviewText.trim().length > 0)
+                .map((log) => (
+                  <div
+                    key={log.id}
+                    style={{
+                      backgroundColor: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: 16,
+                      display: 'flex',
+                      gap: 14,
+                      transition: 'border-color 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-focus)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}
+                  >
+                    {/* Reviewer Details */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Link to={`/users/${log.user.username}`}>
+                          {log.user.avatarUrl ? (
+                            <img
+                              src={log.user.avatarUrl}
+                              alt={log.user.displayName}
+                              style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                width: 26,
+                                height: 26,
+                                borderRadius: '50%',
+                                backgroundColor: 'var(--bg-elevated)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 12,
+                              }}
+                            >
+                              🧀
+                            </div>
+                          )}
                         </Link>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                          reviewed{' '}
-                          <Link to={`/cheeses/${log.cheese.slug}`} style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>
-                            {log.cheese.name}
+                        <div>
+                          <Link
+                            to={`/users/${log.user.username}`}
+                            style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}
+                          >
+                            {log.user.displayName}
                           </Link>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                            reviewed{' '}
+                            <Link to={`/cheeses/${log.cheese.slug}`} style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>
+                              {log.cheese.name}
+                            </Link>
+                          </div>
                         </div>
                       </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <RatingStars value={log.rating} size={14} />
+                        {log.isLiked && <Heart size={13} fill="var(--accent-orange)" color="var(--accent-orange)" />}
+                      </div>
+
+                      <p
+                        style={{
+                          fontSize: 13,
+                          color: 'var(--text-secondary)',
+                          lineHeight: 1.45,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {log.reviewText}
+                      </p>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <RatingStars value={log.rating} size={14} />
-                      {log.isLiked && <Heart size={13} fill="var(--accent-orange)" color="var(--accent-orange)" />}
-                    </div>
-
-                    <p
+                    {/* Cheese Poster Thumbnail */}
+                    <Link
+                      to={`/cheeses/${log.cheese.slug}`}
                       style={{
-                        fontSize: 13,
-                        color: 'var(--text-secondary)',
-                        lineHeight: 1.45,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
+                        width: 65,
+                        flexShrink: 0,
+                        aspectRatio: '2/3',
+                        borderRadius: 'var(--radius-sm)',
                         overflow: 'hidden',
+                        backgroundColor: 'var(--bg-elevated)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
                       }}
                     >
-                      {log.reviewText}
-                    </p>
+                      <img
+                        src={log.photoUrl || log.cheese.imageUrl || log.cheese.type?.thumbnailUrl || ''}
+                        alt={log.cheese.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </Link>
                   </div>
-
-                  {/* Cheese Poster Thumbnail */}
-                  <Link
-                    to={`/cheeses/${log.cheese.slug}`}
-                    style={{
-                      width: 65,
-                      flexShrink: 0,
-                      aspectRatio: '2/3',
-                      borderRadius: 'var(--radius-sm)',
-                      overflow: 'hidden',
-                      backgroundColor: 'var(--bg-elevated)',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
-                    }}
-                  >
-                    <img
-                      src={log.photoUrl || log.cheese.imageUrl || log.cheese.type?.thumbnailUrl || ''}
-                      alt={log.cheese.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  </Link>
-                </div>
-              ))}
+                ))
+            )}
           </div>
         </section>
 

@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import { fetchWikipediaCheeseSummary } from "../src/services/wikipedia.service.js";
 
 const prisma = new PrismaClient();
@@ -13,33 +12,1125 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+// 1. Comprehensive Canonical Cheese Styles
+const CHEESE_TYPES = [
+  { name: "Cottage", wikiTitle: "Cottage cheese" },
+  { name: "Cheddar", wikiTitle: "Cheddar cheese" },
+  { name: "Brie", wikiTitle: "Brie" },
+  { name: "Gouda", wikiTitle: "Gouda cheese" },
+  { name: "Parmesan", wikiTitle: "Parmigiano Reggiano" },
+  { name: "Mozzarella", wikiTitle: "Mozzarella" },
+  { name: "Feta", wikiTitle: "Feta" },
+  { name: "Blue", wikiTitle: "Blue cheese" },
+  { name: "Roquefort", wikiTitle: "Roquefort" },
+  { name: "Gorgonzola", wikiTitle: "Gorgonzola" },
+  { name: "Stilton", wikiTitle: "Stilton cheese" },
+  { name: "Camembert", wikiTitle: "Camembert" },
+  { name: "Gruyère", wikiTitle: "Gruyère cheese" },
+  { name: "Manchego", wikiTitle: "Manchego" },
+  { name: "Halloumi", wikiTitle: "Halloumi" },
+  { name: "Ricotta", wikiTitle: "Ricotta" },
+  { name: "Mascarpone", wikiTitle: "Mascarpone" },
+  { name: "Burrata", wikiTitle: "Burrata" },
+  { name: "Provolone", wikiTitle: "Provolone" },
+  { name: "Havarti", wikiTitle: "Havarti" },
+  { name: "Emmental", wikiTitle: "Emmental cheese" },
+  { name: "Monterey Jack", wikiTitle: "Monterey Jack" },
+  { name: "Colby", wikiTitle: "Colby cheese" },
+  { name: "Fontina", wikiTitle: "Fontina" },
+  { name: "Taleggio", wikiTitle: "Taleggio cheese" },
+  { name: "Pecorino Romano", wikiTitle: "Pecorino Romano" },
+  { name: "Asiago", wikiTitle: "Asiago cheese" },
+  { name: "Grana Padano", wikiTitle: "Grana Padano" },
+  { name: "Morbier", wikiTitle: "Morbier cheese" },
+  { name: "Comté", wikiTitle: "Comté cheese" },
+  { name: "Reblochon", wikiTitle: "Reblochon" },
+  { name: "Époisses", wikiTitle: "Époisses" },
+  { name: "Beaufort", wikiTitle: "Beaufort cheese" },
+  { name: "Raclette", wikiTitle: "Raclette" },
+  { name: "Munster", wikiTitle: "Munster cheese" },
+  { name: "Cantal", wikiTitle: "Cantal cheese" },
+  { name: "Saint-Nectaire", wikiTitle: "Saint-Nectaire" },
+  { name: "Brillat-Savarin", wikiTitle: "Brillat-Savarin cheese" },
+  { name: "Vacherin Mont d'Or", wikiTitle: "Vacherin Mont-d'Or" },
+  { name: "Chèvre", wikiTitle: "Goat cheese" },
+  { name: "Paneer", wikiTitle: "Paneer" },
+  { name: "Oaxaca", wikiTitle: "Oaxaca cheese" },
+  { name: "Cotija", wikiTitle: "Cotija cheese" },
+  { name: "Jarlsberg", wikiTitle: "Jarlsberg cheese" },
+  { name: "Brunost", wikiTitle: "Brunost" },
+  { name: "Maasdam", wikiTitle: "Maasdam cheese" },
+  { name: "Edam", wikiTitle: "Edam cheese" },
+  { name: "Mimolette", wikiTitle: "Mimolette" },
+  { name: "Quark", wikiTitle: "Quark (dairy product)" },
+  { name: "Labneh", wikiTitle: "Strained yogurt" },
+  { name: "Tsfatit", wikiTitle: "Tzfatit" },
+  { name: "Sirene", wikiTitle: "Sirene" },
+  { name: "Kashkaval", wikiTitle: "Kashkaval" },
+];
+
+// 2. Comprehensive Master Cheese Catalog
+interface MasterCheese {
+  name: string;
+  maker: string;
+  typeName: string;
+  fatPercentage?: number | null;
+  description: string;
+  imageUrl?: string;
+}
+
+const MASTER_CHEESES: MasterCheese[] = [
+  // --- COTTAGE CHEESES (ISRAELI & AMERICAN) ---
+  {
+    name: "Classic 5% Cottage Cheese",
+    maker: "Tnuva",
+    typeName: "Cottage",
+    fatPercentage: 5.0,
+    description: "The gold standard of curd cheese in Israel. Renowned for its firm, distinct curds in fresh creamy brine.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Rich 9% Cottage Cheese",
+    maker: "Tnuva",
+    typeName: "Cottage",
+    fatPercentage: 9.0,
+    description: "Luxurious, decadent cottage cheese with rich whole cream and plump, tender curds.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Light 3% Cottage Cheese",
+    maker: "Tnuva",
+    typeName: "Cottage",
+    fatPercentage: 3.0,
+    description: "Low-fat fresh curd cheese that retains signature texture with reduced dairy fat.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Diet 1% Cottage Cheese",
+    maker: "Tnuva",
+    typeName: "Cottage",
+    fatPercentage: 1.0,
+    description: "Ultra-lean cultured curds for health-focused snacking.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Pure 5% Cottage Cheese",
+    maker: "Tara",
+    typeName: "Cottage",
+    fatPercentage: 5.0,
+    description: "Tara's beloved 5% fresh cottage cheese made with pure pasteurized cow's milk and natural salt.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Light 3% Cottage Cheese",
+    maker: "Tara",
+    typeName: "Cottage",
+    fatPercentage: 3.0,
+    description: "Lighter cottage cheese with tender delicate curd structure.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Organic Whole Milk 4% Cottage Cheese",
+    maker: "Good Culture",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Award-winning clean-label organic cottage cheese with active probiotics, thick texture, and zero gums.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Double Cream 6% Classic Cottage",
+    maker: "Good Culture",
+    typeName: "Cottage",
+    fatPercentage: 6.0,
+    description: "Extra rich pasture-raised cottage cheese with velvety creaminess and dense curds.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Low-Fat 2% Small Curd Cottage",
+    maker: "Good Culture",
+    typeName: "Cottage",
+    fatPercentage: 2.0,
+    description: "Cultured low-fat cottage cheese delivering maximum protein with clean tartness.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "4% All Natural Large Curd Cottage",
+    maker: "Breakstone's",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Classic American heritage cottage cheese with prominent, juicy large curds.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "2% Lowfat Small Curd Cottage",
+    maker: "Breakstone's",
+    typeName: "Cottage",
+    fatPercentage: 2.0,
+    description: "Light and tangy staple with fine curds and balanced acidity.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "4% Pure & Natural Cottage Cheese",
+    maker: "Daisy",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Made strictly with cultured milk, cream, and salt. No stabilizers, preservatives, or artificial thickeners.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "2% Low Fat Pure Cottage Cheese",
+    maker: "Daisy",
+    typeName: "Cottage",
+    fatPercentage: 2.0,
+    description: "Pure ingredient low-fat cottage cheese with clean, refreshing lactic flavor.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "4% California Style Cottage Cheese",
+    maker: "Friendship Dairies",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Creamy whole milk cottage cheese with silky consistency and signature East Coast reputation.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "1% Lowfat High Protein Cottage",
+    maker: "Friendship Dairies",
+    typeName: "Cottage",
+    fatPercentage: 1.0,
+    description: "Powerhouse high-protein cottage cheese with only 1% milkfat.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Organic 4% Small Curd Cottage Cheese",
+    maker: "Organic Valley",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Pasture-raised organic dairy curds with sweet creaminess and delicate texture.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Old-Fashioned 4% Small Curd Cottage",
+    maker: "Tillamook",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Pacific Northwest farmstyle cottage cheese crafted with rBST-free fresh milk.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- CHEDDARS (BRITISH, AMERICAN, IRISH) ---
+  {
+    name: "Extra Sharp White Cheddar (Naturally Aged)",
+    maker: "Cabot",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Aged for over 12 months. Incredibly sharp, buttery, with pleasant calcium lactate crystal crunch.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Seriously Sharp Yellow Cheddar",
+    maker: "Cabot",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Cabot's cult-favorite intensely acidic, tongue-tingling sharp farmhouse cheddar.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Clothbound Cheddar 14-Month",
+    maker: "Cabot & Jasper Hill",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Larded cotton bandage aged in the Cellars at Jasper Hill. Caramel sweetness with toasted nuttiness.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Aged Pure Irish Cheddar",
+    maker: "Kerrygold",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Made with milk from grass-fed Irish cows. Deep buttercup yellow, creamy and rich with distinct sharpness.",
+    imageUrl: "https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Dubliner Cheese",
+    maker: "Kerrygold",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Irish signature hybrid combining the bite of aged cheddar with the sweet nutty crystals of parmesan.",
+    imageUrl: "https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Reserve 2-Year Aged Irish Cheddar",
+    maker: "Kerrygold",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Aged for 24 months for crumbly texture and bold, lingering maturity.",
+    imageUrl: "https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Special Reserve Extra Sharp Cheddar",
+    maker: "Tillamook",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Naturally aged for over 15 months using an authentic 100-year-old recipe.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Vintage Maker's Reserve 2020 Cheddar",
+    maker: "Tillamook",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Small-batch private reserve vintage cheddar with delicate crumbly crystals.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Mature Yet Smooth Cheddar",
+    maker: "Cathedral City",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "The UK's top-selling British cheddar from Cornwall, balancing rich maturity with smooth meltability.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Traditional Farmhouse Raw Milk Cheddar",
+    maker: "Montgomery's",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Legendary Somerset raw milk clothbound cheddar. Brothy, beefy, earthy, and complex.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Black Bomber Extra Mature Cheddar",
+    maker: "Snowdonia Cheese Co",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Award-winning Welsh black wax cheddar. Incredibly smooth, savory, with a deep flavor explosion.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Powerful Welsh Cheddar",
+    maker: "Collier's",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Crafted in Wales with an intense savory punch and prominent crunchy tyrosine crystals.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Flagship Signature Cheddar",
+    maker: "Beecher's Handmade Cheese",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Seattle's Pike Place icon: semi-hard cow's milk cheese with a sweet, nutty, lingering finish.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- FRENCH MASTERS (BRIE, CAMEMBERT, BLUE, COMTÉ, ROQUEFORT) ---
+  {
+    name: "Double Cream Brie",
+    maker: "President",
+    typeName: "Brie",
+    fatPercentage: null,
+    description: "Soft cow's milk French classic with an edible velvety bloomy rind and buttery center.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Petit Camembert de Normandie",
+    maker: "President",
+    typeName: "Camembert",
+    fatPercentage: null,
+    description: "Pungent earthy mushroom aromas with a spoonable runny texture when ripe.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Camembert de Normandie AOP",
+    maker: "Isigny Sainte-Mère",
+    typeName: "Camembert",
+    fatPercentage: null,
+    description: "Ladle-molded raw milk Norman camembert with cabbage, damp wood, and truffle notes.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Roquefort Black Label",
+    maker: "Fromageries Papillon",
+    typeName: "Roquefort",
+    fatPercentage: null,
+    description: "King of blue cheeses: cave-aged raw sheep's milk in Combalou caves. Intensely mineral and creamy.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Roquefort Société 1863",
+    maker: "Société",
+    typeName: "Roquefort",
+    fatPercentage: null,
+    description: "The historical reference for Roquefort cheese, rich with emerald veining and ivory curd.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Fort Saint Antoine Comté 18-Month",
+    maker: "Marcel Petite",
+    typeName: "Comté",
+    fatPercentage: null,
+    description: "Aged in an underground military fort in the Jura. Hazelnuts, dried apricots, and browned butter.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Comté Extra 24-Month Reserve",
+    maker: "Marcel Petite",
+    typeName: "Comté",
+    fatPercentage: null,
+    description: "Ultra-mature Montbéliarde cow's milk wheel with crunchy tyrosine crystals and deep broth savoriness.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Époisses de Bourgogne AOP",
+    maker: "Berthaut",
+    typeName: "Époisses",
+    fatPercentage: null,
+    description: "Marc de Bourgogne brandy-washed pungent rind cheese with unctuous, spoonable gooey paste.",
+    imageUrl: "https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Brillat-Savarin Affiné Triple Cream",
+    maker: "Fromagerie Delin",
+    typeName: "Brillat-Savarin",
+    fatPercentage: null,
+    description: "75% dry matter fat triple-crème cheese created in Normandy. Decadent notes of fresh butter and yogurt.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Mimolette 18-Month Extra Vieille",
+    maker: "Isigny Sainte-Mère",
+    typeName: "Mimolette",
+    fatPercentage: null,
+    description: "Vibrant orange cannonball cheese ripened with cheese mites. Roasted coffee, caramel, and hazelnut notes.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Morbier AOP Tradition",
+    maker: "Monts & Terroirs",
+    typeName: "Morbier",
+    fatPercentage: null,
+    description: "Famous for its central vegetable ash vein, soft elasticity, and aromatic cellar rind.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Reblochon de Savoie Fermier",
+    maker: "Paccard",
+    typeName: "Reblochon",
+    fatPercentage: null,
+    description: "Raw mountain milk washed-rind wheel. Essential ingredient of French tartiflette.",
+    imageUrl: "https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Saint Agur Blue Cheese",
+    maker: "Bongrain / Savencia",
+    typeName: "Blue",
+    fatPercentage: null,
+    description: "Double-cream blue cheese from Auvergne. Mild blue bite with melt-in-the-mouth buttery texture.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Boursin Garlic & Fine Herbs",
+    maker: "Bel Group",
+    typeName: "Brie",
+    fatPercentage: null,
+    description: "Creamy Gournay cheese infused with fragrant garlic and delicate herbs.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- ITALIAN ICONS (PARMIGIANO, PECORINO, GORGONZOLA, MOZZARELLA, BURRATA) ---
+  {
+    name: "Parmigiano-Reggiano 24-Month DOP",
+    maker: "Consorzio Parmigiano-Reggiano",
+    typeName: "Parmesan",
+    fatPercentage: null,
+    description: "The undisputed King of Cheeses. Umami-packed raw cow's milk wheel aged 2 years in Emilia-Romagna.",
+    imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Parmigiano-Reggiano Vacche Rosse (Red Cow) 30-Month",
+    maker: "Consorzio Vacche Rosse",
+    typeName: "Parmesan",
+    fatPercentage: null,
+    description: "Made exclusively with rich milk from the ancient Reggiana red cow breed. Sweet, dry, and intensely concentrated.",
+    imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Grana Padano Riserva 20-Month DOP",
+    maker: "Zanetti",
+    typeName: "Grana Padano",
+    fatPercentage: null,
+    description: "Mellow, grainy, and savory hard cheese from the Po river valley.",
+    imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Pecorino Romano Genuine DOP",
+    maker: "Locatelli",
+    typeName: "Pecorino Romano",
+    fatPercentage: null,
+    description: "100% sheep's milk Roman cheese. Salty, sharp, and indispensable for Cacio e Pepe and Carbonara.",
+    imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Gorgonzola Dolce DOP",
+    maker: "Igor",
+    typeName: "Gorgonzola",
+    fatPercentage: null,
+    description: "Creamy, mild, sweet blue cheese with spreadable paste and subtle blue veining.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Gorgonzola Piccante DOP (Mountain Gorgonzola)",
+    maker: "Igor",
+    typeName: "Gorgonzola",
+    fatPercentage: null,
+    description: "Aged longer for a firm, crumbly texture and spicy, pungent blue bite.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Fresh Burrata with Stracciatella",
+    maker: "BelGioioso",
+    typeName: "Burrata",
+    fatPercentage: null,
+    description: "Delicate pouch of mozzarella filled with fresh stracciatella curd and rich panna cream.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Fresh Mozzarella Fior di Latte Ball",
+    maker: "Galbani",
+    typeName: "Mozzarella",
+    fatPercentage: null,
+    description: "Mild, moist whole milk fresh mozzarella ball packed in water.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Taleggio DOP",
+    maker: "Arrigoni",
+    typeName: "Taleggio",
+    fatPercentage: null,
+    description: "Washed-rind Lombardy cheese with mild fruited funkiness and super-creamy melt.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Provolone Piccante Stravecchio",
+    maker: "Auricchio",
+    typeName: "Provolone",
+    fatPercentage: null,
+    description: "Aged for over a year with goat rennet for a famously fiery, sharp Italian punch.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Creamy Traditional Italian Mascarpone",
+    maker: "Galbani",
+    typeName: "Mascarpone",
+    fatPercentage: null,
+    description: "Ultra-rich triple cream cheese, the essential heart of authentic tiramisu.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- DUTCH & ALPINE CHEESES (GOUDA, GRUYÈRE, EMMENTAL) ---
+  {
+    name: "Classic Aged Gouda (8-Month)",
+    maker: "Old Amsterdam",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Firm, crumbly, and sweet with caramel undertones and fine ripening crystals.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Extra Aged Gouda (18-Month)",
+    maker: "Old Amsterdam",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Deep butterscotch aromas and dark golden paste with crunchy calcium crystals.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "XO 26-Month Extra Aged Gouda",
+    maker: "Beemster",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Aged over 2 years in historic Beemster polder warehouses. Whiskey, butterscotch, and crunchy umami crystals.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Classic 18-Month Beemster Gouda",
+    maker: "Beemster",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Rich, nutty, and savory with balanced sweetness from grass-fed polder cow milk.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "1-Year VSOP Aged Gouda",
+    maker: "Reypenaer",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Traditionally matured in a 100-year-old historic wooden cheese warehouse on the Oude Rijn.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "1000 DAYS Extra Aged Gouda",
+    maker: "Landana",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Matured naturally for almost 3 years. Intensely crystallized with deeply roasted flavor.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Truffle Infused Gouda Wheel",
+    maker: "Landana",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Creamy Dutch Gouda packed with real black summer truffles and porcini mushroom notes.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Kaltbach Le Gruyère AOP (Cave-Aged 12-Month)",
+    maker: "Emmi",
+    typeName: "Gruyère",
+    fatPercentage: null,
+    description: "Ripened in the natural sandstone caves of Kaltbach, Switzerland. Mineral, rustic, and crumbly.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Kaltbach Cave-Aged Emmentaler AOP",
+    maker: "Emmi",
+    typeName: "Emmental",
+    fatPercentage: null,
+    description: "Iconic Swiss hole cheese with dark brown cave rind, sweet hazelnut, and herbal depth.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Appenzeller Black Label (Extra)",
+    maker: "Emmi",
+    typeName: "Gruyère",
+    fatPercentage: null,
+    description: "Washed with a secret herbal wine brine for at least 6 months. Pungent, spicy, and full-bodied.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Tête de Moine AOP Rosettes",
+    maker: "Emmi",
+    typeName: "Gruyère",
+    fatPercentage: null,
+    description: "Monk's head cheese shaved into delicate aromatic rosettes with a Girolle scraper.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- SPANISH & MEDITERRANEAN (MANCHEGO, FETA, HALLOUMI) ---
+  {
+    name: "Manchego Curado 6-Month DOP",
+    maker: "García Baquero",
+    typeName: "Manchego",
+    fatPercentage: null,
+    description: "Classic La Mancha sheep's milk cheese with signature herringbone rind and nutty oiliness.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Gran Reserva Manchego 12-Month DOP",
+    maker: "Dehesa de Los Llanos",
+    typeName: "Manchego",
+    fatPercentage: null,
+    description: "World Cheese Awards World Champion. Pure raw Manchega sheep's milk aged for a full year.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Drunken Goat (Murcia al Vino DOP)",
+    maker: "Mitica",
+    typeName: "Chèvre",
+    fatPercentage: null,
+    description: "Creamy Spanish goat cheese soaked in Doble Pasta red wine, resulting in a striking purple rind.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Traditional Greek Feta (P.D.O)",
+    maker: "Dodoni",
+    typeName: "Feta",
+    fatPercentage: null,
+    description: "Authentic Epirus sheep and goat milk feta preserved in natural brine. Tangy, salty, and crumbly.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Authentic Cyprus Grill Halloumi",
+    maker: "Dodoni",
+    typeName: "Halloumi",
+    fatPercentage: null,
+    description: "High-melting point cheese infused with mint leaves. Grills and fries to crispy golden perfection.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- AMERICAN ARTISAN CREAMERIES ---
+  {
+    name: "Harbison (Spruce Bark-Wrapped)",
+    maker: "Jasper Hill Farm",
+    typeName: "Brie",
+    fatPercentage: null,
+    description: "Bloomy rind soft cheese bound with spruce bark cambium. Woodsy, mustardy, and spoonable.",
+    imageUrl: "https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Bayley Hazen Blue",
+    maker: "Jasper Hill Farm",
+    typeName: "Blue",
+    fatPercentage: null,
+    description: "Raw milk natural rind blue cheese with fudge-like texture, chocolate, and toasted nut notes.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Rogue River Blue (World Champion)",
+    maker: "Rogue Creamery",
+    typeName: "Blue",
+    fatPercentage: null,
+    description: "World Cheese Awards 2019 Champion. Wrapped in Syrah grape leaves macerated in pear liqueur.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Humboldt Fog Soft-Ripened Goat",
+    maker: "Cypress Grove",
+    typeName: "Chèvre",
+    fatPercentage: null,
+    description: "California icon: delicate bloomy goat milk cheese with a distinctive ribbon of edible vegetable ash.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Midnight Moon Aged Goat Gouda",
+    maker: "Cypress Grove",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Aged Dutch-style goat cheese with brown butter finish and prominent tyrosine crunch.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Mt Tam Organic Triple Cream",
+    maker: "Cowgirl Creamery",
+    typeName: "Brie",
+    fatPercentage: null,
+    description: "Point Reyes organic milk triple cream with cultured sweet butter and white mushroom aromas.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Original Blue Farmstead",
+    maker: "Point Reyes",
+    typeName: "Blue",
+    fatPercentage: null,
+    description: "California coastal raw milk blue cheese with bright acidity and peppery finish.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "BellaVitano Merlot",
+    maker: "Sartori",
+    typeName: "Parmesan",
+    fatPercentage: null,
+    description: "Rich Wisconsin cow's milk wheel bathed in deep Merlot wine, lending berry notes to a crystalline paste.",
+    imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "BellaVitano Espresso",
+    maker: "Sartori",
+    typeName: "Parmesan",
+    fatPercentage: null,
+    description: "Hand-rubbed with fresh roasted Italian espresso beans for smoky, roasted, sweet contrast.",
+    imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- ISRAELI & MIDDLE EASTERN SPECIALTIES ---
+  {
+    name: "Emek Classic 28% Sliced",
+    maker: "Tnuva",
+    typeName: "Gouda",
+    fatPercentage: 28.0,
+    description: "Israel's iconic semi-hard yellow cheese, a toast and sandwich staple since 1936.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Emek 9% Light Yellow Cheese",
+    maker: "Tnuva",
+    typeName: "Gouda",
+    fatPercentage: 9.0,
+    description: "Reduced fat yellow cheese developed for everyday healthy toasties.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Tsfatit Traditional 5% Cheese",
+    maker: "Tnuva",
+    typeName: "Tsfatit",
+    fatPercentage: 5.0,
+    description: "Semi-hard fresh brined cheese originating from the city of Safed. Salty, springy, and light.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Bulgarian Brined 5% Cheese",
+    maker: "Tnuva",
+    typeName: "Sirene",
+    fatPercentage: 5.0,
+    description: "Salty brined white cheese, the classic pairing for watermelon and Israeli salads.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Bulgarian Rich 24% Cheese",
+    maker: "Tnuva",
+    typeName: "Sirene",
+    fatPercentage: 24.0,
+    description: "Full-fat traditional Sirene cheese with creamy crumbly texture and rich salinity.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Traditional Kashkaval Wheel",
+    maker: "Tnuva",
+    typeName: "Kashkaval",
+    fatPercentage: null,
+    description: "Aged yellow sheep and cow's milk cheese with olive oil sheen, spicy kick, and great grating quality.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Noam 100% Natural Gouda",
+    maker: "Tara",
+    typeName: "Gouda",
+    fatPercentage: null,
+    description: "Tara's natural semi-hard yellow cheese made without preservatives.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Authentic Labaneh with Olive Oil & Za'atar",
+    maker: "Gad Dairies",
+    typeName: "Labneh",
+    fatPercentage: null,
+    description: "Thick strained yogurt cheese with sour lactic tang, drizzled with virgin olive oil and wild za'atar.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Artisanal Halloumi",
+    maker: "Gad Dairies",
+    typeName: "Halloumi",
+    fatPercentage: null,
+    description: "Fresh squeaky cheese designed specifically for grilling on the plancha.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- NORDIC & GERMAN SPECIALTIES ---
+  {
+    name: "Original Norwegian Jarlsberg",
+    maker: "Jarlsberg",
+    typeName: "Jarlsberg",
+    fatPercentage: null,
+    description: "Mild, buttery, and nutty with large round eyes. Norway's most famous cheese export.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Gudbrandsdalen Brunost (Brown Cheese)",
+    maker: "Tine",
+    typeName: "Brunost",
+    fatPercentage: null,
+    description: "Norwegian whey cheese caramelized over hours. Tastes like salty fudge and dulce de leche.",
+    imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Creamy Danish Havarti",
+    maker: "Castello",
+    typeName: "Havarti",
+    fatPercentage: null,
+    description: "Mild, creamy semi-soft Danish cheese with small irregular eyes and smooth buttery melt.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Traditional Danablu (Danish Blue)",
+    maker: "Castello",
+    typeName: "Blue",
+    fatPercentage: null,
+    description: "Pungent, salty, sharp blue cheese with marble-veined paste.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Cambozola Classic Triple Cream Blue",
+    maker: "Käserei Champignon",
+    typeName: "Blue",
+    fatPercentage: null,
+    description: "German innovation marrying the velvety softness of Camembert with the gentle piquancy of Gorgonzola.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Rougette Bavarian Red",
+    maker: "Käserei Champignon",
+    typeName: "Brie",
+    fatPercentage: null,
+    description: "Soft ripened cheese with a distinctive red rind and rich buttery heart.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- ADDITIONAL COTTAGE CHEESES ---
+  {
+    name: "Old Fashioned 4% Cottage Cheese",
+    maker: "Darigold",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Pacific Northwest dairy classic with wholesome fresh curds and golden rich cream.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Organic Whole Milk 4% Cottage Cheese",
+    maker: "Clover Sonoma",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Northern California pasture-raised organic cottage cheese, non-GMO and hormone-free.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Organic 4% Whole Milk Probiotic Cottage",
+    maker: "Nancy's Probiotic",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Cultured with billions of live probiotics, distinctively tangy and dense.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Country Style 4% Small Curd Cottage",
+    maker: "Hood",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "New England dairy heritage cottage cheese with velvety cream dressing.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Organic 4% Small Curd Cottage",
+    maker: "Trader Joe's",
+    typeName: "Cottage",
+    fatPercentage: 4.0,
+    description: "Cultured organic small curd cottage cheese with simple wholesome ingredients.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- BRITISH & IRISH SPECIALTIES ---
+  {
+    name: "Traditional Blue Stilton Colston Bassett",
+    maker: "Colston Bassett",
+    typeName: "Stilton",
+    fatPercentage: null,
+    description: "The King of English blue cheeses: hand-ladled curd yielding velvety, creamy, buttery blue paste.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Keen's Traditional Clothbound Cheddar",
+    maker: "Keen's Cheddar",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Raw unpasteurized milk cheddar from Somerset with pungent onion, mustard, and horseradish notes.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "1833 Vintage Reserve Cheddar",
+    maker: "Barber's",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Aged for 24 months in Maryland Farm, Somerset. Intense savory complexity with pronounced tyrosine crystals.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Vintage Reserve British Cheddar",
+    maker: "Wyke Farms",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "100% green energy Somerset cheddar aged over 15 months with sweet caramel bite.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Red Fox Aged Red Leicester",
+    maker: "Belton Farm",
+    typeName: "Colby",
+    fatPercentage: null,
+    description: "Handcrafted russet-colored wheel with unexpected subtle sweet crunch and creamy russet paste.",
+    imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Real Yorkshire Wensleydale with Cranberries",
+    maker: "Wensleydale Creamery",
+    typeName: "Cheddar",
+    fatPercentage: null,
+    description: "Creamy, crumbly Yorkshire cheese studded with tart, juicy sweetened cranberries.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- REGIONAL FRENCH HERITAGE ---
+  {
+    name: "Beaufort d'Alpage AOP",
+    maker: "Coopérative de Beaufort",
+    typeName: "Beaufort",
+    fatPercentage: null,
+    description: "Prince of Gruyères: crafted exclusively in high Alpine mountain chalets during summer pasturing.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Saint-Nectaire Fermier AOP",
+    maker: "Ferme de la Haute Dordogne",
+    typeName: "Saint-Nectaire",
+    fatPercentage: null,
+    description: "Aged on rye straw mats in volcanic Auvergne caves. Earthy rye, forest floor, and hazelnut aromas.",
+    imageUrl: "https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Fourme d'Ambert AOP",
+    maker: "Fromagerie Paul Dischamp",
+    typeName: "Blue",
+    fatPercentage: null,
+    description: "One of France's oldest cheeses. Dense cylinder blue cheese with mild creamy moisture and rounded piquancy.",
+    imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Délice de Bourgogne Triple Cream",
+    maker: "Fromagerie Delin",
+    typeName: "Brie",
+    fatPercentage: null,
+    description: "Decadent Burgundy triple-crème with a pungent edible bloomy rind and luxurious whipped butter paste.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Mont d'Or du Haut-Doubs AOP",
+    maker: "Badoz",
+    typeName: "Vacherin Mont d'Or",
+    fatPercentage: null,
+    description: "Seasonal winter jewel bound in spruce bark and served warm with a spoon straight out of its wooden box.",
+    imageUrl: "https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Ossau-Iraty AOP Raw Sheep Cheese",
+    maker: "Onetik",
+    typeName: "Manchego",
+    fatPercentage: null,
+    description: "Basque and Béarn Pyrenean unpasteurized sheep's milk cheese. Smooth, grassy, with toasted wheat notes.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- ADDITIONAL ITALIAN CLASSICS ---
+  {
+    name: "Pecorino Toscano DOP Stagionato",
+    maker: "Caseificio Il Fiorino",
+    typeName: "Pecorino Romano",
+    fatPercentage: null,
+    description: "Aged Tuscan sheep milk cheese, milder and sweeter than Roman pecorino with delicate herb aromas.",
+    imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Fontina Val d'Aosta DOP",
+    maker: "Cooperativa Produttori Latte Fontina",
+    typeName: "Fontina",
+    fatPercentage: null,
+    description: "Traditional Italian Alpine raw milk cheese with earthy, pungent funk and unrivaled melting qualities.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Asiago Pressato DOP",
+    maker: "Zanetti",
+    typeName: "Asiago",
+    fatPercentage: null,
+    description: "Young fresh Asiago from Veneto. Soft, milky, melting, and subtly sweet.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Ricotta Salata Stagionata",
+    maker: "Locatelli",
+    typeName: "Ricotta",
+    fatPercentage: null,
+    description: "Firm, salted, and aged sheep milk whey cheese designed for shaving over pasta alla Norma.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- SWISS & DUTCH SPECIALTIES ---
+  {
+    name: "Original Dutch Leerdammer",
+    maker: "Leerdammer",
+    typeName: "Maasdam",
+    fatPercentage: null,
+    description: "Beloved Dutch hole cheese marrying the nuttiness of Emmental with the mild creaminess of Gouda.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Sbrinz AOP Extra Hard",
+    maker: "Mifroma",
+    typeName: "Parmesan",
+    fatPercentage: null,
+    description: "Switzerland's oldest cheese: aged for over 24 months, traditionally rolled into paper-thin curls.",
+    imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Raclette du Valais AOP",
+    maker: "Mifroma",
+    typeName: "Raclette",
+    fatPercentage: null,
+    description: "The classic Swiss melting cheese. Velvety, aromatic, and scraped over hot potatoes and pickles.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- NORTH AMERICAN CULT ARTISANS ---
+  {
+    name: "Pleasant Ridge Reserve",
+    maker: "Uplands Cheese Company",
+    typeName: "Beaufort",
+    fatPercentage: null,
+    description: "Most-awarded cheese in American history. Alpine-style pasture raw milk wheel with pineapple and broth notes.",
+    imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Rush Creek Reserve (Seasonal)",
+    maker: "Uplands Cheese Company",
+    typeName: "Vacherin Mont d'Or",
+    fatPercentage: null,
+    description: "Autumn seasonal raw milk wheel wrapped in spruce bark. Decadent, custard-like, and cured over months.",
+    imageUrl: "https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Bonne Bouche Ash-Ripened Goat",
+    maker: "Vermont Creamery",
+    typeName: "Chèvre",
+    fatPercentage: null,
+    description: "Geotrichum-ripened goat milk medallion lightly sprinkled with poplar wood ash. Creamy citrus complexity.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Original Fresh Goat Cheese Log",
+    maker: "Laura Chenel",
+    typeName: "Chèvre",
+    fatPercentage: null,
+    description: "Sonoma County pioneer of American artisan chèvre. Fresh, bright, milky, and clean.",
+    imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
+  },
+
+  // --- LATIN AMERICAN & ASIAN SPECIALTIES ---
+  {
+    name: "Auténtico Queso Cotija",
+    maker: "Cacique",
+    typeName: "Cotija",
+    fatPercentage: null,
+    description: "The 'Parmesan of Mexico': dry, salty, firm grating cheese indispensable for street corn elote.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Queso Oaxaca Traditional String",
+    maker: "El Mexicano",
+    typeName: "Oaxaca",
+    fatPercentage: null,
+    description: "Braided Mexican pasta filata cheese that shreds into strings and melts into quesadillas.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Malai Fresh Paneer",
+    maker: "Amul",
+    typeName: "Paneer",
+    fatPercentage: null,
+    description: "Non-melting unaged Indian curd cheese, ideal for absorbing rich curries and tandoori grilling.",
+    imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
+  },
+];
+
+
 async function main() {
-  console.log("🧀 Starting Cheeseboxd database seeding...");
+  console.log("🧀 Seeding definitive Cheeseboxd master catalog...");
 
-  // 1. Seed Cheese Types with Wikipedia descriptions
-  const typesToSeed = [
-    { name: "Cheddar", wikiTitle: "Cheddar cheese" },
-    { name: "Cottage", wikiTitle: "Cottage cheese" },
-    { name: "Brie", wikiTitle: "Brie" },
-    { name: "Gouda", wikiTitle: "Gouda cheese" },
-    { name: "Parmesan", wikiTitle: "Parmigiano Reggiano" },
-    { name: "Mozzarella", wikiTitle: "Mozzarella" },
-    { name: "Feta", wikiTitle: "Feta" },
-    { name: "Blue", wikiTitle: "Blue cheese" },
-    { name: "Ricotta", wikiTitle: "Ricotta" },
-    { name: "Gruyère", wikiTitle: "Gruyère cheese" },
-    { name: "Manchego", wikiTitle: "Manchego" },
-    { name: "Camembert", wikiTitle: "Camembert" },
-    { name: "Halloumi", wikiTitle: "Halloumi" },
-    { name: "Gorgonzola", wikiTitle: "Gorgonzola" },
-    { name: "Roquefort", wikiTitle: "Roquefort" },
-  ];
-
+  // 1. Seed All Types with Wikipedia summaries
   const typeMap = new Map<string, string>();
 
-  for (const item of typesToSeed) {
+  for (const item of CHEESE_TYPES) {
     const slug = slugify(item.name);
-    console.log(`Fetching Wikipedia summary for type: ${item.name}...`);
+    console.log(`Checking Wikipedia summary for type: ${item.name}...`);
     const wikiData = await fetchWikipediaCheeseSummary(item.wikiTitle);
 
     const record = await prisma.cheeseType.upsert({
@@ -61,122 +1152,15 @@ async function main() {
     typeMap.set(item.name, record.id);
   }
 
-  console.log(`✅ Seeded ${typeMap.size} cheese types with Wikipedia descriptions.`);
+  console.log(`✅ Seeded ${typeMap.size} canonical cheese styles.`);
 
-  // 2. Seed Cheeses (Maker + Type + optional Fat %)
-  const cheesesToSeed = [
-    {
-      name: "Classic 5% Cottage Cheese",
-      maker: "Tnuva",
-      typeName: "Cottage",
-      fatPercentage: 5.0,
-      description: "Israel's iconic curd cheese. Perfect balance of creamy moisture and distinct firm curds.",
-      imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Rich 9% Cottage Cheese",
-      maker: "Tnuva",
-      typeName: "Cottage",
-      fatPercentage: 9.0,
-      description: "Heavy cream, rich and luxurious texture with large soft curds.",
-      imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Organic Whole Milk 4% Cottage Cheese",
-      maker: "Good Culture",
-      typeName: "Cottage",
-      fatPercentage: 4.0,
-      description: "Thick, probiotic-rich cultured cottage cheese with no gums or chemical stabilizers.",
-      imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Lowfat 2% Small Curd Cottage",
-      maker: "Breakstone's",
-      typeName: "Cottage",
-      fatPercentage: 2.0,
-      description: "Classic American supermarket staple, tangy and light small curd.",
-      imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Extra Sharp White Cheddar (Naturally Aged)",
-      maker: "Cabot",
-      typeName: "Cheddar",
-      fatPercentage: null,
-      description: "Aged for a minimum of 1 year, intensely tangy with pleasant calcium lactate crystal crunches.",
-      imageUrl: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Aged Pure Irish Cheddar",
-      maker: "Kerrygold",
-      typeName: "Cheddar",
-      fatPercentage: null,
-      description: "Grass-fed cow's milk cheddar from Ireland. Rich golden hue, buttery and sharp.",
-      imageUrl: "https://images.unsplash.com/photo-1624806992066-5ffcf7ca186b?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Double Cream Brie",
-      maker: "President",
-      typeName: "Brie",
-      fatPercentage: null,
-      description: "Silky, buttery French-style soft cheese with an edible bloomy white rind.",
-      imageUrl: "https://images.unsplash.com/photo-1589881133595-a3c085cb731d?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Harbison (Spruce Bark-Wrapped)",
-      maker: "Jasper Hill Farm",
-      typeName: "Brie",
-      fatPercentage: null,
-      description: "Bloomy-rind cheese wrapped in spruce bark cambium. Spoonable, woodsy, mustardy.",
-      imageUrl: "https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Classic Aged Gouda (8 Months)",
-      maker: "Old Amsterdam",
-      typeName: "Gouda",
-      fatPercentage: null,
-      description: "Smooth caramel notes with fine ripening crystals and a firm, crumbly bite.",
-      imageUrl: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "XO 26-Month Extra Aged Gouda",
-      maker: "Beemster",
-      typeName: "Gouda",
-      fatPercentage: null,
-      description: "Deep butterscotch sweetness, whiskey undertones, and crunchy umami crystals.",
-      imageUrl: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Authentic Parmigiano-Reggiano 24-Month",
-      maker: "Consorzio Parmigiano",
-      typeName: "Parmesan",
-      fatPercentage: null,
-      description: "DOP certified from Emilia-Romagna. Intense umami, crumbly texture, crystalline crunch.",
-      imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Traditional Greek Feta (P.D.O)",
-      maker: "Dodoni",
-      typeName: "Feta",
-      fatPercentage: null,
-      description: "Authentic Greek sheep and goat milk feta. Tangy, salty, creamy crumbly brine.",
-      imageUrl: "https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      name: "Roquefort Black Label",
-      maker: "Papillon",
-      typeName: "Roquefort",
-      fatPercentage: null,
-      description: "Cave-aged raw sheep's milk blue cheese. Intensely mineral, salty, creamy, and pungent.",
-      imageUrl: "https://images.unsplash.com/photo-1625085576340-9a8c0817e4f1?auto=format&fit=crop&w=600&q=80",
-    },
-  ];
-
-  const cheeseRecords = [];
-  for (const c of cheesesToSeed) {
+  // 2. Seed Master Cheeses
+  let createdCount = 0;
+  for (const c of MASTER_CHEESES) {
     const slug = slugify(`${c.maker}-${c.name}`);
     const typeId = typeMap.get(c.typeName) || null;
 
-    const record = await prisma.cheese.upsert({
+    await prisma.cheese.upsert({
       where: { slug },
       update: {
         name: c.name,
@@ -196,148 +1180,11 @@ async function main() {
         imageUrl: c.imageUrl,
       },
     });
-    cheeseRecords.push(record);
+    createdCount++;
   }
 
-  console.log(`✅ Seeded ${cheeseRecords.length} curated cheeses.`);
-
-  // 3. Seed a Demo User
-  const passwordHash = await bcrypt.hash("password123", 10);
-  const demoUser = await prisma.user.upsert({
-    where: { username: "curdlover" },
-    update: {
-      passwordHash,
-      displayName: "Gouda Guy",
-      bio: "Rating every cottage cheese and aged cheddar on earth. 🧀",
-      avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
-      location: "Amsterdam / Tel Aviv",
-    },
-    create: {
-      username: "curdlover",
-      email: "cheese@cheeseboxd.com",
-      passwordHash,
-      displayName: "Gouda Guy",
-      bio: "Rating every cottage cheese and aged cheddar on earth. 🧀",
-      avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
-      location: "Amsterdam / Tel Aviv",
-    },
-  });
-
-  console.log(`✅ Seeded demo user: ${demoUser.username} (${demoUser.email})`);
-
-  // 4. Seed User's Top 4 Favorites
-  const top4Cheeses = [
-    cheeseRecords.find((c) => c.slug.includes("harbison")) || cheeseRecords[0],
-    cheeseRecords.find((c) => c.slug.includes("tnuva-classic-5")) || cheeseRecords[1],
-    cheeseRecords.find((c) => c.slug.includes("beemster")) || cheeseRecords[2],
-    cheeseRecords.find((c) => c.slug.includes("parmigiano")) || cheeseRecords[3],
-  ];
-
-  for (let i = 0; i < 4; i++) {
-    if (top4Cheeses[i]) {
-      await prisma.userFavorite.upsert({
-        where: {
-          userId_position: {
-            userId: demoUser.id,
-            position: i + 1,
-          },
-        },
-        update: { cheeseId: top4Cheeses[i].id },
-        create: {
-          userId: demoUser.id,
-          position: i + 1,
-          cheeseId: top4Cheeses[i].id,
-        },
-      });
-    }
-  }
-
-  console.log("✅ Seeded Top 4 Favorites.");
-
-  // 5. Seed Logs (Letterboxd Style: 0-5 stars, reviews, photos, dates, likes)
-  const sampleLogs = [
-    {
-      cheeseSlug: "jasper-hill-farm-harbison-spruce-bark-wrapped",
-      rating: 5.0,
-      isLiked: true,
-      reviewText: "An absolute masterpiece. Cut the top rind off and dip crusty sourdough straight into it. Woodsy, bacon-y, buttery heaven.",
-      consumedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), // Yesterday
-    },
-    {
-      cheeseSlug: "tnuva-classic-5-cottage-cheese",
-      rating: 4.5,
-      isLiked: true,
-      reviewText: "The gold standard of cottage cheese. Salt level is dialed in and the curds retain great firmness.",
-      consumedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    },
-    {
-      cheeseSlug: "beemster-xo-26-month-extra-aged-gouda",
-      rating: 5.0,
-      isLiked: true,
-      reviewText: "Those crunchy tyrosine crystals are addictive. Rich butterscotch sweetness paired with a stout.",
-      consumedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-    },
-    {
-      cheeseSlug: "cabot-extra-sharp-white-cheddar-naturally-aged",
-      rating: 4.0,
-      isLiked: true,
-      reviewText: "Reliable, sharp punch. Best bang for buck snacking cheddar.",
-      consumedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8),
-    },
-    {
-      cheeseSlug: "breakstones-lowfat-2-small-curd-cottage",
-      rating: 2.5,
-      isLiked: false,
-      reviewText: "A bit watery compared to Good Culture or Tnuva. Curds are somewhat mushy.",
-      consumedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12),
-    },
-    {
-      cheeseSlug: "president-double-cream-brie",
-      rating: 3.5,
-      isLiked: false,
-      reviewText: "Decent supermarket brie, nice melt when baked with honey, but lacks farmhouse complexity.",
-      consumedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15),
-    },
-  ];
-
-  for (const log of sampleLogs) {
-    const cheese = cheeseRecords.find((c) => c.slug === log.cheeseSlug);
-    if (cheese) {
-      // Delete any existing log for this specific demo pairing to avoid duplicates
-      await prisma.cheeseLog.create({
-        data: {
-          userId: demoUser.id,
-          cheeseId: cheese.id,
-          rating: log.rating,
-          isLiked: log.isLiked,
-          reviewText: log.reviewText,
-          consumedAt: log.consumedAt,
-          photoUrl: cheese.imageUrl,
-        },
-      });
-    }
-  }
-
-  console.log(`✅ Seeded ${sampleLogs.length} cheese logs.`);
-
-  // 6. Seed a Custom List
-  const list = await prisma.customList.create({
-    data: {
-      userId: demoUser.id,
-      title: "Top Supermarket Cheeses That Punch Above Their Weight",
-      description: "My favorite accessible cheeses you can grab at any grocery store.",
-      isRanked: true,
-      items: {
-        create: [
-          { cheeseId: cheeseRecords[0].id, position: 1, notes: "Unbeatable cottage staple" },
-          { cheeseId: cheeseRecords[4].id, position: 2, notes: "The sharpest fridge block" },
-          { cheeseId: cheeseRecords[8].id, position: 3, notes: "Always reliable aged gouda" },
-        ],
-      },
-    },
-  });
-
-  console.log(`✅ Seeded custom list: "${list.title}"`);
+  console.log(`✅ Master cheese database seeded with ${createdCount} authentic cheeses.`);
+  console.log(`🛡️ ZERO fake users or reviews created. User database remains 100% clean and persistent.`);
   console.log("🎉 Seeding complete!");
 }
 

@@ -50,20 +50,23 @@ async function runTests() {
   assert(singleCheese.maker === "Tnuva", "Cheese maker is correct");
   assert(singleCheese.fatPercentage === 5, "Fat percentage is 5.0%");
   assert(singleCheese.stats.ratingHistogram !== undefined, "Contains Letterboxd 10-bucket rating histogram");
-  assert(typeof singleCheese.stats.avgRating === "number", `Average rating computed: ${singleCheese.stats.avgRating} stars`);
+  assert(singleCheese.stats.avgRating === null || typeof singleCheese.stats.avgRating === "number", `Average rating field valid: ${singleCheese.stats.avgRating ?? "unrated"}`);
 
-  // 5. Test Auth: Login with Demo User
-  const loginRes = await fetch(`${BASE_URL}/auth/login`, {
+  // 5. Test Auth: Dynamic User Registration & Login
+  const testUsername = `user_${Date.now().toString().slice(-6)}`;
+  const regRes = await fetch(`${BASE_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      usernameOrEmail: "curdlover",
-      password: "password123",
+      username: testUsername,
+      email: `${testUsername}@example.com`,
+      password: "securepassword123",
+      displayName: "Real Taste Tester",
     }),
   });
-  const loginData = await loginRes.json();
-  assert(loginRes.ok && loginData.token, "Logged in successfully and received JWT");
-  const token = loginData.token;
+  const regData = await regRes.json();
+  assert(regRes.ok && regData.token, `Registered real account: ${testUsername} and received JWT`);
+  const token = regData.token;
 
   // 6. Test Logging a Cheese (0-5 stars, review, photo, like)
   const cabotCheese = (await (await fetch(`${BASE_URL}/cheeses?q=Cabot`)).json()).items[0];
@@ -84,16 +87,12 @@ async function runTests() {
   const newLog = await newLogRes.json();
   assert(newLogRes.status === 201 && newLog.log.rating === 4.5, "Created new cheese log with 4.5 stars and review");
 
-  // 7. Test User Profile Behavior (Top 4 favorites, rating distribution, stats)
-  const profileRes = await fetch(`${BASE_URL}/users/curdlover`);
+  // 7. Test User Profile Behavior (Stats, rating distribution, logs)
+  const profileRes = await fetch(`${BASE_URL}/users/${testUsername}`);
   const profile = await profileRes.json();
-  assert(profile.user.username === "curdlover", "Retrieved user profile");
-  assert(profile.top4.length === 4, `Top 4 cheeses display populated (count: ${profile.top4.length})`);
-  console.log(`   Top 4 Cheeses: ${profile.top4.map(f => `#${f.position} ${f.cheese.maker} ${f.cheese.name}`).join(" | ")}`);
-  assert(profile.stats.ratingHistogram["4.5"] >= 1, "Rating histogram dynamically updated with 4.5 star log");
-  assert(profile.stats.totalLogs >= 6, `Total logs count: ${profile.stats.totalLogs}`);
-  console.log(`   Top styles by user: ${profile.stats.topTypes.map(t => `${t.name} (${t.count})`).join(", ")}`);
-  console.log(`   Top makers by user: ${profile.stats.topMakers.map(m => `${m.name} (${m.count})`).join(", ")}`);
+  assert(profile.user.username === testUsername, "Retrieved user profile for real registered user");
+  assert(profile.stats.ratingHistogram["4.5"] === 1, "Rating histogram dynamically updated with 4.5 star log");
+  assert(profile.stats.totalLogs === 1, `Total logs count: ${profile.stats.totalLogs}`);
 
   // 8. Test Wishlist ("Want to Taste")
   const roquefortCheese = (await (await fetch(`${BASE_URL}/cheeses?q=Roquefort`)).json()).items[0];

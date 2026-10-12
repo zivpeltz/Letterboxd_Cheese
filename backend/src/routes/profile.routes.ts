@@ -5,6 +5,59 @@ import { requireAuth, AuthenticatedRequest } from "../middlewares/auth.middlewar
 
 export const profileRouter = Router();
 
+// GET /api/users - List real community members
+profileRouter.get("/", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const users = await prisma.user.findMany({
+      take: 50,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        bio: true,
+        avatarUrl: true,
+        location: true,
+        createdAt: true,
+        favorites: {
+          orderBy: { position: "asc" },
+          include: {
+            cheese: {
+              select: { id: true, name: true, maker: true, imageUrl: true },
+            },
+          },
+        },
+        _count: {
+          select: { logs: true },
+        },
+      },
+    });
+
+    res.json({
+      users: users.map((u) => ({
+        id: u.id,
+        username: u.username,
+        displayName: u.displayName,
+        bio: u.bio,
+        avatarUrl: u.avatarUrl,
+        location: u.location,
+        createdAt: u.createdAt,
+        stats: {
+          totalLogs: u._count.logs,
+        },
+        top4: u.favorites.map((fav) => ({
+          position: fav.position,
+          cheese: fav.cheese,
+        })),
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Failed to fetch users." });
+  }
+});
+
+
 // 1. GET /api/users/:username - Full Letterboxd-Style Profile
 profileRouter.get("/:username", async (req: Request, res: Response): Promise<void> => {
   try {

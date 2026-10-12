@@ -32,11 +32,6 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  const fillDemoAccount = () => {
-    setUsername('curdlover');
-    setPassword('password123');
-  };
-
   return (
     <div className="modal-overlay" onClick={closeAuthModal}>
       <div className="modal-content" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
@@ -61,40 +56,6 @@ export const AuthModal: React.FC = () => {
                 }}
               >
                 {error}
-              </div>
-            )}
-
-            {authModalMode === 'signin' && (
-              <div
-                style={{
-                  backgroundColor: 'rgba(229, 169, 59, 0.12)',
-                  border: '1px solid rgba(229, 169, 59, 0.3)',
-                  padding: '10px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <div style={{ fontSize: 12, color: 'var(--accent-gold)' }}>
-                  Demo user pre-seeded in database:
-                </div>
-                <button
-                  type="button"
-                  onClick={fillDemoAccount}
-                  style={{
-                    backgroundColor: 'var(--accent-gold)',
-                    border: 'none',
-                    color: '#000',
-                    padding: '4px 8px',
-                    borderRadius: 3,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Quick Fill Demo
-                </button>
               </div>
             )}
 

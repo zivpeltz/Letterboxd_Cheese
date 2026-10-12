@@ -291,6 +291,24 @@ export const api = {
     return res.json();
   },
 
+  async getUsers(): Promise<{
+    users: Array<{
+      id: string;
+      username: string;
+      displayName: string;
+      bio?: string | null;
+      avatarUrl?: string | null;
+      location?: string | null;
+      createdAt: string;
+      stats: { totalLogs: number };
+      top4: Array<{ position: number; cheese: Cheese }>;
+    }>;
+  }> {
+    const res = await fetch(`${API_BASE}/users`);
+    if (!res.ok) throw new Error('Failed to fetch users');
+    return res.json();
+  },
+
   async setTopFavorites(cheeseIds: string[]): Promise<any> {
     const res = await fetch(`${API_BASE}/users/favorites`, {
       method: 'PUT',
